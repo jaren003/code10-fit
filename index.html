@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core10 - Daily Fitness</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --not-started: #d1d1d1;
+            --completed: #4caf50;
+            --accent: #2196f3;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; }
+        header { padding: 20px; text-align: center; }
+        
+        /* The Body Container */
+        #body-map { position: relative; width: 300px; height: 500px; background: #eee; border-radius: 50px; margin: 20px; border: 2px solid #ccc; }
+        .muscle-node { position: absolute; width: 45px; height: 45px; border-radius: 50%; background: var(--not-started); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 3px solid white; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .muscle-node.done { background: var(--completed); }
+        
+        /* Muscle Positioning */
+        #node-heart { top: 20%; left: 42%; background: #ff5252; } /* Heart is distinct */
+        #node-chest { top: 25%; left: 20%; }
+        #node-back { top: 25%; left: 65%; }
+        #node-shoulders { top: 15%; left: 10%; }
+        #node-biceps { top: 30%; left: 5%; }
+        #node-triceps { top: 30%; left: 80%; }
+        #node-core { top: 40%; left: 42%; }
+        #node-quads { top: 60%; left: 30%; }
+        #node-hams { top: 60%; left: 55%; }
+        #node-calves { top: 80%; left: 42%; }
+
+        /* Modal / UI */
+        #exercise-panel { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: var(--card-bg); padding: 20px; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); display: none; z-index: 10; }
+        .btn-reset { margin-top: 20px; padding: 12px 25px; background: var(--accent); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        .exercise-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; align-items: center; justify-content: space-between; }
+        a { color: var(--accent); text-decoration: none; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Core10 Tracker</h1>
+    <p>Tap a muscle to start</p>
+</header>
+
+<div id="body-map">
+    <div class="muscle-node" id="node-heart" onclick="showExercises('Heart')">HEART</div>
+    <div class="muscle-node" id="node-shoulders" onclick="showExercises('Shoulders')">SHLD</div>
+    <div class="muscle-node" id="node-chest" onclick="showExercises('Chest')">CHEST</div>
+    <div class="muscle-node" id="node-back" onclick="showExercises('Back')">BACK</div>
+    <div class="muscle-node" id="node-biceps" onclick="showExercises('Biceps')">BICEP</div>
+    <div class="muscle-node" id="node-triceps" onclick="showExercises('Triceps')">TRICEP</div>
+    <div class="muscle-node" id="node-core" onclick="showExercises('Core')">CORE</div>
+    <div class="muscle-node" id="node-quads" onclick="showExercises('Quads')">QUAD</div>
+    <div class="muscle-node" id="node-hams" onclick="showExercises('Hamstrings')">HAM</div>
+    <div class="muscle-node" id="node-calves" onclick="showExercises('Calves')">CALF</div>
+</div>
+
+<div id="exercise-panel">
+    <h2 id="muscle-title">Muscle</h2>
+    <div id="exercise-list"></div>
+    <button class="btn-reset" onclick="closePanel()">Close</button>
+</div>
+
+<button class="btn-reset" style="background:#444;" onclick="resetAll()">Reset Day</button>
+
+<script>
+    const data = {
+        'Heart': [{n: 'Jumping Jacks', d: 'High intensity for 1 min', v: 'https://youtu.be/2W4ZNSwoW_4'}, {n: 'Mountain Climbers', d: 'Fast pace', v: '#'}, {n: 'Burpees', d: 'Full body burn', v: '#'}],
+        'Chest': [{n: 'Standard Pushups', d: '3 sets of 10', v: '#'}, {n: 'Incline Pushups', d: 'Hands on table', v: '#'}, {n: 'Diamond Pushups', d: 'Close grip', v: '#'}],
+        // ... (Logic repeats for other muscles)
+    };
+
+    let progress = JSON.parse(localStorage.getItem('core10_progress')) || {};
+
+    function showExercises(muscle) {
+        document.getElementById('exercise-panel').style.display = 'block';
+        document.getElementById('muscle-title').innerText = muscle;
+        const list = document.getElementById('exercise-list');
+        list.innerHTML = (data[muscle] || [{n: 'Default Move', d: '3x10', v: '#'}]).map((ex, i) => `
+            <div class="exercise-item">
+                <div>
+                    <strong>${ex.n}</strong><br><small>${ex.d}</small><br>
+                    <a href="${ex.v}" target="_blank">Watch Video</a>
+                </div>
+                <input type="checkbox" ${progress[muscle] ? 'checked' : ''} onchange="toggleMuscle('${muscle}')">
+            </div>
+        `).join('');
+    }
+
+    function toggleMuscle(muscle) {
+        progress[muscle] = !progress[muscle];
+        localStorage.setItem('core10_progress', JSON.stringify(progress));
+        updateVisuals();
+    }
+
+    function updateVisuals() {
+        for (let m in progress) {
+            const el = document.getElementById('node-' + m.toLowerCase().substring(0,4));
+            // simplified mapping for demo
+            const nodes = document.querySelectorAll('.muscle-node');
+            nodes.forEach(n => {
+                if(n.innerText.includes(m.substring(0,3).toUpperCase())) {
+                    progress[m] ? n.classList.add('done') : n.classList.remove('done');
+                }
+            });
+        }
+    }
+
+    function resetAll() {
+        progress = {};
+        localStorage.clear();
+        document.querySelectorAll('.muscle-node').forEach(n => n.classList.remove('done'));
+    }
+
+    function closePanel() { document.getElementById('exercise-panel').style.display = 'none'; }
+    updateVisuals();
+</script>
+</body>
+</html>
