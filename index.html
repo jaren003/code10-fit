@@ -2,122 +2,318 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Core10 - Daily Fitness</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Core10 Daily</title>
     <style>
         :root {
-            --bg-color: #f4f4f9;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
             --card-bg: #ffffff;
-            --not-started: #d1d1d1;
-            --completed: #4caf50;
-            --accent: #2196f3;
+            --not-started: #e0e0e0; /* Light Gray */
+            --completed: #4cd964; /* iOS Green */
+            --accent: #007aff; /* iOS Blue */
+            --danger: #ff3b30;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; }
-        header { padding: 20px; text-align: center; }
-        
-        /* The Body Container */
-        #body-map { position: relative; width: 300px; height: 500px; background: #eee; border-radius: 50px; margin: 20px; border: 2px solid #ccc; }
-        .muscle-node { position: absolute; width: 45px; height: 45px; border-radius: 50%; background: var(--not-started); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 3px solid white; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .muscle-node.done { background: var(--completed); }
-        
-        /* Muscle Positioning */
-        #node-heart { top: 20%; left: 42%; background: #ff5252; } /* Heart is distinct */
-        #node-chest { top: 25%; left: 20%; }
-        #node-back { top: 25%; left: 65%; }
-        #node-shoulders { top: 15%; left: 10%; }
-        #node-biceps { top: 30%; left: 5%; }
-        #node-triceps { top: 30%; left: 80%; }
-        #node-core { top: 40%; left: 42%; }
-        #node-quads { top: 60%; left: 30%; }
-        #node-hams { top: 60%; left: 55%; }
-        #node-calves { top: 80%; left: 42%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px 0 80px 0; /* Padding for fixed footer button */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 1.8rem; }
+        p { margin: 5px 0 0 0; color: #666; }
 
-        /* Modal / UI */
-        #exercise-panel { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: var(--card-bg); padding: 20px; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); display: none; z-index: 10; }
-        .btn-reset { margin-top: 20px; padding: 12px 25px; background: var(--accent); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; }
-        .exercise-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; align-items: center; justify-content: space-between; }
-        a { color: var(--accent); text-decoration: none; font-size: 0.8em; }
+        /* --- The Body Map Container --- */
+        #body-container {
+            position: relative;
+            width: 320px;
+            height: 550px;
+            /* Embedded SVG Stick Figure Background */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 400'%3E%3Cg stroke='%23d1d1d6' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='100' cy='50' r='30'/%3E%3Cline x1='100' y1='80' x2='100' y2='220'/%3E%3Cline x1='100' y1='110' x2='40' y2='110'/%3E%3Cline x1='40' y1='110' x2='40' y2='180'/%3E%3Cline x1='100' y1='110' x2='160' y2='110'/%3E%3Cline x1='160' y1='110' x2='160' y2='180'/%3E%3Cline x1='100' y1='220' x2='60' y2='350'/%3E%3Cline x1='100' y1='220' x2='140' y2='350'/%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            margin: auto;
+        }
+
+        /* --- Muscle Hotspots --- */
+        .muscle-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--not-started);
+            color: #555;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .muscle-node.done {
+            background: var(--completed);
+            color: white;
+            border-color: #d4f7d9;
+        }
+        /* Positioning Hotspots over the stick figure */
+        #node-heart { top: 25%; left: 42%; background: #ffb3b3; color: #c00; } /* Special Heart Color */
+        #node-heart.done { background: #ff3b30; color: white; }
+        #node-shoulders { top: 20%; left: 8%; }
+        #node-chest { top: 30%; left: 22%; }
+        #node-back { top: 30%; left: 62%; }
+        #node-biceps { top: 40%; left: 5%; }
+        #node-triceps { top: 40%; left: 80%; }
+        #node-core { top: 48%; left: 42%; }
+        #node-quads { top: 65%; left: 25%; }
+        #node-hams { top: 65%; left: 60%; }
+        #node-calves { top: 85%; left: 42%; }
+
+        /* --- Modal Panel --- */
+        #modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none; z-index: 99;
+        }
+        #exercise-panel {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--card-bg);
+            border-radius: 20px 20px 0 0;
+            padding: 25px; box-sizing: border-box;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            transform: translateY(100%); transition: transform 0.3s ease-out;
+            z-index: 100; max-height: 80vh; overflow-y: auto;
+        }
+        #exercise-panel.active { transform: translateY(0); }
+        
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .panel-header h2 { margin: 0; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; }
+        
+        .exercise-item {
+            background: #f0f2f5; padding: 15px; border-radius: 12px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .ex-details strong { display: block; font-size: 1.1rem; margin-bottom: 4px;}
+        .ex-details small { color: #666; display: block; margin-bottom: 8px;}
+        .ex-link { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem;}
+        
+        /* Big Custom Checkbox */
+        .status-check {
+            width: 40px; height: 40px;
+            border-radius: 50%; border: 3px solid var(--not-started);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; font-size: 1.5rem; color: transparent;
+        }
+        .status-check.checked {
+            background: var(--completed); border-color: var(--completed); color: white;
+        }
+
+        /* --- Reset Button Footer --- */
+        .footer-reset {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px;
+            background: #333; color: white;
+            border: none; border-radius: 30px;
+            font-weight: bold; font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
+        }
+        .footer-reset:active { transform: translateX(-50%) scale(0.98); }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Core10 Tracker</h1>
-    <p>Tap a muscle to start</p>
+    <h1>Core10 Daily</h1>
+    <p>Tap a muscle group to begin</p>
 </header>
 
-<div id="body-map">
-    <div class="muscle-node" id="node-heart" onclick="showExercises('Heart')">HEART</div>
-    <div class="muscle-node" id="node-shoulders" onclick="showExercises('Shoulders')">SHLD</div>
-    <div class="muscle-node" id="node-chest" onclick="showExercises('Chest')">CHEST</div>
-    <div class="muscle-node" id="node-back" onclick="showExercises('Back')">BACK</div>
-    <div class="muscle-node" id="node-biceps" onclick="showExercises('Biceps')">BICEP</div>
-    <div class="muscle-node" id="node-triceps" onclick="showExercises('Triceps')">TRICEP</div>
-    <div class="muscle-node" id="node-core" onclick="showExercises('Core')">CORE</div>
-    <div class="muscle-node" id="node-quads" onclick="showExercises('Quads')">QUAD</div>
-    <div class="muscle-node" id="node-hams" onclick="showExercises('Hamstrings')">HAM</div>
-    <div class="muscle-node" id="node-calves" onclick="showExercises('Calves')">CALF</div>
+<div id="body-container">
+    <div class="muscle-node" id="node-heart" data-muscle="Heart"><span>Heart</span><small>Cardio</small></div>
+    <div class="muscle-node" id="node-shoulders" data-muscle="Shoulders"><span>Shld</span></div>
+    <div class="muscle-node" id="node-chest" data-muscle="Chest"><span>Chest</span></div>
+    <div class="muscle-node" id="node-back" data-muscle="Back"><span>Back</span></div>
+    <div class="muscle-node" id="node-biceps" data-muscle="Biceps"><span>Bicep</span></div>
+    <div class="muscle-node" id="node-triceps" data-muscle="Triceps"><span>Tricep</span></div>
+    <div class="muscle-node" id="node-core" data-muscle="Core"><span>Core</span></div>
+    <div class="muscle-node" id="node-quads" data-muscle="Quads"><span>Quad</span></div>
+    <div class="muscle-node" id="node-hams" data-muscle="Hamstrings"><span>Hams</span></div>
+    <div class="muscle-node" id="node-calves" data-muscle="Calves"><span>Calf</span></div>
 </div>
 
+<div id="modal-backdrop" onclick="closePanel()"></div>
 <div id="exercise-panel">
-    <h2 id="muscle-title">Muscle</h2>
-    <div id="exercise-list"></div>
-    <button class="btn-reset" onclick="closePanel()">Close</button>
+    <div class="panel-header">
+        <h2 id="muscle-title">Muscle Group</h2>
+        <button class="close-btn" onclick="closePanel()">&times;</button>
+    </div>
+    <div id="exercise-list">
+        </div>
 </div>
 
-<button class="btn-reset" style="background:#444;" onclick="resetAll()">Reset Day</button>
+<button class="footer-reset" onclick="resetDay()">Finish & Reset Day</button>
 
 <script>
-    const data = {
-        'Heart': [{n: 'Jumping Jacks', d: 'High intensity for 1 min', v: 'https://youtu.be/2W4ZNSwoW_4'}, {n: 'Mountain Climbers', d: 'Fast pace', v: '#'}, {n: 'Burpees', d: 'Full body burn', v: '#'}],
-        'Chest': [{n: 'Standard Pushups', d: '3 sets of 10', v: '#'}, {n: 'Incline Pushups', d: 'Hands on table', v: '#'}, {n: 'Diamond Pushups', d: 'Close grip', v: '#'}],
-        // ... (Logic repeats for other muscles)
+    // --- ADMIN AREA: Full Database of 30 Exercises ---
+    // Edit the strings below to change content. 'v' is the video link.
+    const exerciseDB = {
+        'Heart': [
+            {n: 'Jumping Jacks', d: 'Steady pace for 60 seconds.', v: 'https://www.youtube.com/results?search_query=how+to+do+jumping+jacks'},
+            {n: 'Burpees (Slow)', d: '10 reps. Step back if needed, no jump.', v: 'https://www.youtube.com/results?search_query=beginner+burpees'},
+            {n: 'High Knees jogging', d: '45 seconds, bring knees to waist height.', v: 'https://www.youtube.com/results?search_query=high+knees+exercise'}
+        ],
+        'Chest': [
+            {n: 'Push-ups', d: '3 sets of 8-12. Knees or toes.', v: 'https://www.youtube.com/results?search_query=perfect+pushup+form'},
+            {n: 'Incline Push-ups', d: '3 sets of 10. Hands on a sturdy chair/couch.', v: 'https://www.youtube.com/results?search_query=incline+pushups+at+home'},
+            {n: 'Wall Push-aways', d: '3 sets of 15. Standing, press off wall explosively.', v: 'https://www.youtube.com/results?search_query=wall+push+aways'}
+        ],
+        'Back': [
+            {n: 'Superman Hold', d: '3 sets, hold for 20 seconds each.', v: 'https://www.youtube.com/results?search_query=superman+exercise'},
+            {n: 'Doorway Rows', d: '3 sets of 12. Use a doorframe to pull yourself forward.', v: 'https://www.youtube.com/results?search_query=doorway+rows+home'},
+            {n: 'Prone Cobra', d: '3 sets of 10 reps. Squeeze shoulder blades.', v: 'https://www.youtube.com/results?search_query=prone+cobra+exercise'}
+        ],
+        'Shoulders': [
+            {n: 'Pike Push-ups', d: '3 sets of 8. Hips high like a downward dog.', v: 'https://www.youtube.com/results?search_query=pike+pushups+form'},
+            {n: 'Lateral Raises (Water bottles)', d: '3 sets of 15. Raise arms to sides slowly.', v: 'https://www.youtube.com/results?search_query=dumbbell+lateral+raise+form'},
+            {n: 'Arm Circles', d: '30 secs forward, 30 secs backward. Keep tight.', v: 'https://www.youtube.com/results?search_query=arm+circles+workout'}
+        ],
+        'Biceps': [
+            {n: 'Towel Isometric Curl', d: '3 reps of 20 sec holds. Step on towel, pull up hard without moving.', v: 'https://www.youtube.com/results?search_query=towel+bicep+curl+isometric'},
+            {n: 'Backpack Curls', d: '3 sets of 12. Fill a bag with books and curl.', v: 'https://www.youtube.com/results?search_query=backpack+bicep+curls'},
+            {n: 'Hammer Curls (Bottles)', d: '3 sets of 15. Palms facing each other.', v: 'https://www.youtube.com/results?search_query=hammer+curls+form'}
+        ],
+        'Triceps': [
+            {n: 'Chair Dips', d: '3 sets of 10. Legs straight is harder, bent easier.', v: 'https://www.youtube.com/results?search_query=chair+dips+at+home'},
+            {n: 'Diamond Push-ups (Knees)', d: '3 sets of 8. Hands close together forming diamond.', v: 'https://www.youtube.com/results?search_query=diamond+pushups+on+knees'},
+            {n: 'Overhead Extension (Bottle)', d: '3 sets of 15. Hold heavy bottle behind head, extend up.', v: 'https://www.youtube.com/results?search_query=overhead+tricep+extension+dumbbell'}
+        ],
+        'Core': [
+            {n: 'Plank Hold', d: 'Hold for as long as possible with good form (aim 45s+).', v: 'https://www.youtube.com/results?search_query=perfect+plank+form'},
+            {n: 'Bicycle Crunches', d: '3 sets of 20 total taps (10 per side).', v: 'https://www.youtube.com/results?search_query=bicycle+crunches'},
+            {n: 'Lying Leg Raises', d: '3 sets of 12. Keep lower back pressed to floor.', v: 'https://www.youtube.com/results?search_query=lying+leg+raises'}
+        ],
+        'Quads': [
+            {n: 'Bodyweight Squats', d: '3 sets of 15. Chest up, sit back.', v: 'https://www.youtube.com/results?search_query=air+squat+form'},
+            {n: 'Alternating Lunges', d: '3 sets of 20 total steps.', v: 'https://www.youtube.com/results?search_query=reverse+lunges+form'},
+            {n: 'Wall Sit', d: 'Hold for max time (aim for 60s).', v: 'https://www.youtube.com/results?search_query=how+to+do+a+wall+sit'}
+        ],
+        'Hamstrings': [
+            {n: 'Glute Bridges', d: '3 sets of 15. Squeeze glutes hard at the top.', v: 'https://www.youtube.com/results?search_query=glute+bridge+form'},
+            {n: 'Single Leg Bridge', d: '3 sets of 10 per leg.', v: 'https://www.youtube.com/results?search_query=single+leg+glute+bridge'},
+            {n: 'Donkey Kicks', d: '3 sets of 15 per leg. On all fours, kick up.', v: 'https://www.youtube.com/results?search_query=donkey+kicks+exercise'}
+        ],
+        'Calves': [
+            {n: 'Standing Calf Raises', d: '3 sets of 20. Use wall for balance, slow tempo.', v: 'https://www.youtube.com/results?search_query=standing+calf+raise+bodyweight'},
+            {n: 'Single Leg Calf Raise', d: '3 sets of 12 per leg.', v: 'https://www.youtube.com/results?search_query=single+leg+calf+raise'},
+            {n: 'Seated Calf Raise', d: '3 sets of 20. Sit on chair, put heavy book on knees, raise heels.', v: 'https://www.youtube.com/results?search_query=seated+calf+raise+at+home'}
+        ]
     };
 
-    let progress = JSON.parse(localStorage.getItem('core10_progress')) || {};
+    // --- App Logic ---
 
-    function showExercises(muscle) {
-        document.getElementById('exercise-panel').style.display = 'block';
-        document.getElementById('muscle-title').innerText = muscle;
-        const list = document.getElementById('exercise-list');
-        list.innerHTML = (data[muscle] || [{n: 'Default Move', d: '3x10', v: '#'}]).map((ex, i) => `
+    // 1. Load saved state or initialize empty object
+    let userProgress = JSON.parse(localStorage.getItem('core10State')) || {};
+
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const exercisePanel = document.getElementById('exercise-panel');
+    const muscleTitleStr = document.getElementById('muscle-title');
+    const exerciseListContainer = document.getElementById('exercise-list');
+
+    // 2. Event Listeners for the body map hotspots
+    document.querySelectorAll('.muscle-node').forEach(node => {
+        node.addEventListener('click', function() {
+            const muscleName = this.getAttribute('data-muscle');
+            openPanel(muscleName);
+        });
+    });
+
+    // 3. Function to open modal and render exercises
+    function openPanel(muscle) {
+        muscleTitleStr.innerText = muscle;
+        const exercises = exerciseDB[muscle];
+        // Check if this muscle group is already marked "done" today
+        const isMuscleDone = userProgress[muscle] === true;
+
+        exerciseListContainer.innerHTML = exercises.map((ex, index) => `
             <div class="exercise-item">
-                <div>
-                    <strong>${ex.n}</strong><br><small>${ex.d}</small><br>
-                    <a href="${ex.v}" target="_blank">Watch Video</a>
+                <div class="ex-details">
+                    <strong>${ex.n}</strong>
+                    <small>${ex.d}</small>
+                    <a href="${ex.v}" target="_blank" class="ex-link">Watch Tutorial ></a>
                 </div>
-                <input type="checkbox" ${progress[muscle] ? 'checked' : ''} onchange="toggleMuscle('${muscle}')">
+                <div class="status-check ${isMuscleDone ? 'checked' : ''}" onclick="toggleCompletion('${muscle}', this)">
+                   ✓
+                </div>
             </div>
         `).join('');
+        
+        modalBackdrop.style.display = 'block';
+        // Small timeout to allow CSS transition to work
+        setTimeout(() => exercisePanel.classList.add('active'), 10);
     }
 
-    function toggleMuscle(muscle) {
-        progress[muscle] = !progress[muscle];
-        localStorage.setItem('core10_progress', JSON.stringify(progress));
-        updateVisuals();
+    // 4. Function to handle clicking the checkmark
+    function toggleCompletion(muscle, checkElement) {
+        // Toggle state
+        userProgress[muscle] = !userProgress[muscle];
+        
+        // Update UI immediately in modal
+        if(userProgress[muscle]) {
+            checkElement.classList.add('checked');
+        } else {
+            checkElement.classList.remove('checked');
+        }
+
+        // Save to local storage
+        localStorage.setItem('core10State', JSON.stringify(userProgress));
+        
+        // Update the main body map view
+        updateBodyMap();
+        
+        // Optional: Close modal automatically on completion for smoother flow
+        // setTimeout(closePanel, 300); 
     }
 
-    function updateVisuals() {
-        for (let m in progress) {
-            const el = document.getElementById('node-' + m.toLowerCase().substring(0,4));
-            // simplified mapping for demo
-            const nodes = document.querySelectorAll('.muscle-node');
-            nodes.forEach(n => {
-                if(n.innerText.includes(m.substring(0,3).toUpperCase())) {
-                    progress[m] ? n.classList.add('done') : n.classList.remove('done');
-                }
-            });
+    // 5. Function to update the green/gray status on the main body map
+    function updateBodyMap() {
+        document.querySelectorAll('.muscle-node').forEach(node => {
+            const mName = node.getAttribute('data-muscle');
+            if(userProgress[mName]) {
+                node.classList.add('done');
+            } else {
+                node.classList.remove('done');
+            }
+        });
+    }
+
+    // 6. Close Modal helper
+    function closePanel() {
+        exercisePanel.classList.remove('active');
+        setTimeout(() => { modalBackdrop.style.display = 'none'; }, 300);
+    }
+
+    // 7. Reset Day button
+    function resetDay() {
+        if(confirm("Are you sure you want to finish the day and reset all progress?")) {
+            userProgress = {};
+            localStorage.removeItem('core10State');
+            updateBodyMap();
+            closePanel();
         }
     }
 
-    function resetAll() {
-        progress = {};
-        localStorage.clear();
-        document.querySelectorAll('.muscle-node').forEach(n => n.classList.remove('done'));
-    }
+    // Initialize view on load
+    updateBodyMap();
 
-    function closePanel() { document.getElementById('exercise-panel').style.display = 'none'; }
-    updateVisuals();
 </script>
 </body>
 </html>
